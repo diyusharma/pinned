@@ -18,6 +18,13 @@ const INITIAL_GROUPS = [
   { id: 'g3', name: 'US National Parks', color: '#22c55e', emoji: '🌲' }
 ];
 
+// A11Y FIX: Pre-populated list of semantic emojis for the legend dropdown
+const MAP_EMOJIS = [
+  '📌', '📍', '❄️', '🎸', '🌲', '🍔', '☕', '🛒', '🏥', '🏫', '🏢', '🏛️', 
+  '⛪', '🚻', '♿', '🚇', '🚌', '🚲', '🚗', '🅿️', '⚠️', '⭐', '❤️', '🔥', 
+  '✅', '❌', '👀', '🎉', '🍎', '🏕️', '🎭', '🎨', '⚽', '🐕'
+];
+
 const INITIAL_ITEMS = [
   {
     id: '1', type: 'pin', groupId: 'g1',
@@ -510,7 +517,7 @@ export default function App() {
   // Global Keyboard Navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+      if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'SELECT') return;
       
       const key = e.key.toLowerCase();
       
@@ -812,14 +819,17 @@ export default function App() {
               <li key={g.id} className="flex items-center text-slate-900 dark:text-slate-100 font-bold text-base">
                 {isEditingLegend ? (
                   <div className="flex items-center w-full space-x-2 animate-in fade-in zoom-in-95 duration-200">
-                    <input 
-                      type="text" 
-                      value={g.emoji} 
-                      onChange={(e) => updateGroup(g.id, { emoji: e.target.value })} 
-                      className="w-10 h-10 text-center rounded bg-slate-100 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700" 
-                      aria-label="Category Emoji"
-                      maxLength={2}
-                    />
+                    <select
+                      value={g.emoji}
+                      onChange={(e) => updateGroup(g.id, { emoji: e.target.value })}
+                      className="w-12 h-10 px-1 text-center rounded bg-slate-100 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 cursor-pointer"
+                      aria-label={`Select emoji for ${g.name}`}
+                    >
+                      {!MAP_EMOJIS.includes(g.emoji) && g.emoji && <option value={g.emoji}>{g.emoji}</option>}
+                      {MAP_EMOJIS.map(emoji => (
+                        <option key={emoji} value={emoji}>{emoji}</option>
+                      ))}
+                    </select>
                     <input 
                       type="color" 
                       value={g.color} 
@@ -1544,6 +1554,7 @@ const CanvasNode = ({ item, isSelected, effectiveColor, groupEmoji, positionStyl
       <div className="absolute z-10" style={{ left: positionStyle.left, top: positionStyle.top, transform: `translate(-50%, -100%) scale(${finalScale})`, transformOrigin: 'bottom center' }}>
         <div {...a11yProps} className={`cursor-pointer group focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 rounded-full transition-transform ${isSelected ? 'scale-125 ring-4 ring-indigo-700' : 'hover:scale-110'}`} data-id={item.id}>
           
+          {/* A11Y FIX: Rendering Emoji over pin for colorblind distinguishability with AAA contrast stroke */}
           <div className="relative">
             <MapPin className="w-14 h-14 filter drop-shadow-xl text-slate-900 dark:text-slate-100" strokeWidth={2.5} style={{ fill: effectiveColor }} aria-hidden="true" />
             {(groupEmoji || item.emoji) && (
