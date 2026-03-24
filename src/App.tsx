@@ -83,13 +83,19 @@ const LeafletMapEngine = ({
     if (!mapInstance) return;
     if (tileLayerRef.current) mapInstance.removeLayer(tileLayerRef.current);
     
-    let url = 'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png'; 
+    // FIX: Using Esri Enterprise servers as base. 
+    // This fully prevents the OpenStreetMap 403 Vercel blocking AND fixes the mixed-language endonyms.
+    let url = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}'; 
+    
     if (mapStyle === 'dark') url = 'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png';
     if (mapStyle === 'light') url = 'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';
     if (mapStyle === 'satellite') url = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
     if (mapStyle === 'terrain') url = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'; 
 
-    if (accessibleRoutes) url = 'https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png';
+    // FIX: Replaced blocked volunteer OSM servers with reliable, highly-legible Esri Canvas
+    if (accessibleRoutes) {
+      url = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
+    }
 
     tileLayerRef.current = window.L.tileLayer(url, { maxZoom: 19 }).addTo(mapInstance);
   }, [mapInstance, mapStyle, accessibleRoutes]);
