@@ -810,7 +810,7 @@ export default function App() {
                className="p-2 bg-slate-100 dark:bg-slate-700 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-slate-700 dark:text-slate-300 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700"
                aria-label={isEditingLegend ? "Done editing legend" : "Edit legend"}
              >
-               {isEditingLegend ? <CheckSquare className="w-4 h-4"/> : <Edit3 className="w-4 h-4"/>}
+               {isEditingLegend ? <CheckSquare className="w-5 h-5"/> : <Edit3 className="w-5 h-5"/>}
              </button>
           </div>
 
@@ -822,7 +822,7 @@ export default function App() {
                     <select
                       value={g.emoji}
                       onChange={(e) => updateGroup(g.id, { emoji: e.target.value })}
-                      className="w-12 h-10 px-1 text-center rounded bg-slate-100 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 cursor-pointer"
+                      className="w-12 h-10 px-1 text-center text-base rounded bg-slate-100 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 cursor-pointer"
                       aria-label={`Select emoji for ${g.name}`}
                     >
                       {!MAP_EMOJIS.includes(g.emoji) && g.emoji && <option value={g.emoji}>{g.emoji}</option>}
@@ -841,7 +841,7 @@ export default function App() {
                       type="text" 
                       value={g.name} 
                       onChange={(e) => updateGroup(g.id, { name: e.target.value })} 
-                      className="flex-1 bg-slate-100 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded px-2 py-2 text-sm focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700" 
+                      className="flex-1 bg-slate-100 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded px-2 py-2 text-base focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700" 
                       aria-label="Category Name"
                     />
                     <button 
@@ -849,14 +849,14 @@ export default function App() {
                       className="text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 p-2 rounded focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-700"
                       aria-label="Delete Category"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-5 h-5" />
                     </button>
                   </div>
                 ) : (
                   <>
-                    <div className="relative w-8 h-8 flex items-center justify-center mr-4 shrink-0">
-                      <MapPin className="w-8 h-8 absolute drop-shadow-md text-slate-900 dark:text-slate-100" strokeWidth={2.5} style={{ fill: g.color }} />
-                      <div className="absolute top-[2px] left-1/2 -translate-x-1/2 w-4 h-4 bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-100 rounded-full flex items-center justify-center text-[8px] shadow-sm">
+                    <div className="relative w-10 h-10 flex items-center justify-center mr-4 shrink-0">
+                      <MapPin className="w-10 h-10 absolute drop-shadow-md text-slate-900 dark:text-slate-100" strokeWidth={2.5} style={{ fill: g.color }} />
+                      <div className="absolute top-[4px] left-1/2 -translate-x-1/2 w-5 h-5 bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-100 rounded-full flex items-center justify-center text-base shadow-sm">
                         {g.emoji}
                       </div>
                     </div>
@@ -870,9 +870,9 @@ export default function App() {
           {isEditingLegend && (
              <button 
                 onClick={addGroup} 
-                className="mt-4 w-full py-2 flex items-center justify-center space-x-2 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 transition-colors"
+                className="mt-4 w-full py-2 flex items-center justify-center space-x-2 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 transition-colors text-base"
               >
-                <Plus className="w-4 h-4"/> <span>Add Category</span>
+                <Plus className="w-5 h-5"/> <span>Add Category</span>
               </button>
           )}
         </div>
@@ -942,13 +942,13 @@ export default function App() {
                   <input type="file" accept=".csv" onChange={handleCSVUpload} ref={csvUploadRef} className="hidden" aria-hidden="true" />
                   <button 
                     onClick={() => csvUploadRef.current.click()} 
-                    className="flex items-center px-4 py-2 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-900 dark:text-indigo-100 border-2 border-indigo-300 dark:border-indigo-600 rounded-xl font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors"
+                    className="flex items-center px-4 py-2 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-900 dark:text-indigo-100 border-2 border-indigo-300 dark:border-indigo-600 rounded-xl font-bold text-base focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors"
                   >
                     <Download className="w-5 h-5 mr-2"/> Import CSV
                   </button>
                   <button 
                     onClick={handleAddManualRecord} 
-                    className="flex items-center px-4 py-2 bg-indigo-700 dark:bg-indigo-600 text-white border-2 border-indigo-800 dark:border-indigo-500 rounded-xl font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 hover:bg-indigo-800 dark:hover:bg-indigo-500 transition-colors shadow-md"
+                    className="flex items-center px-4 py-2 bg-indigo-700 dark:bg-indigo-600 text-white border-2 border-indigo-800 dark:border-indigo-500 rounded-xl font-bold text-base focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 hover:bg-indigo-800 dark:hover:bg-indigo-500 transition-colors shadow-md"
                   >
                     <Plus className="w-5 h-5 mr-2"/> Add Record
                   </button>
@@ -977,7 +977,7 @@ export default function App() {
                   <tbody>
                     {sortedItems.length === 0 ? (
                       <tr>
-                        <td colSpan="5" className="p-8 text-center text-slate-600 dark:text-slate-400 font-bold">No records found. Import a CSV or add a new record.</td>
+                        <td colSpan="5" className="p-8 text-center text-base text-slate-800 dark:text-slate-200 font-bold">No records found. Import a CSV or add a new record.</td>
                       </tr>
                     ) : (
                       sortedItems.map(item => (
@@ -985,7 +985,7 @@ export default function App() {
                             onClick={() => { setViewMode('map'); setSelectedId(item.id); announce(`Located ${item.title} on map.`); }}
                             onKeyDown={(e) => { if(e.key==='Enter') { setViewMode('map'); setSelectedId(item.id); } }}>
                           <td className="p-4 text-base font-bold text-slate-900 dark:text-white flex items-center">
-                            {getItemGroupEmoji(item) && <span className="mr-2" aria-hidden="true">{getItemGroupEmoji(item)}</span>}
+                            {getItemGroupEmoji(item) && <span className="mr-2 text-base" aria-hidden="true">{getItemGroupEmoji(item)}</span>}
                             {item.title}
                           </td>
                           <td className="p-4 text-base text-slate-800 dark:text-slate-200 capitalize">{item.type}</td>
@@ -1055,7 +1055,7 @@ export default function App() {
 
             {viewMode === 'map' && isMapMenuOpen && (
               <div className="absolute top-full left-0 mt-2 bg-white dark:bg-slate-800 rounded-xl shadow-xl border-2 border-slate-300 dark:border-slate-600 py-2 w-64 z-[800] flex flex-col" role="menu" aria-label="Map Style Options">
-                <div className="px-4 pb-2 mb-1 text-base font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider border-b-2 border-slate-200 dark:border-slate-700" aria-hidden="true">Map Style</div>
+                <div className="px-4 pb-2 mb-1 text-base font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider border-b-2 border-slate-200 dark:border-slate-700" aria-hidden="true">Map Style</div>
                 
                 <MapStyleMenuItem icon={Navigation} label="Accessible Routes" active={accessibleRoutes} onClick={() => { setAccessibleRoutes(true); setIsMapMenuOpen(false); announce("Changed map style to Accessible Routes"); }} />
                 <MapStyleMenuItem icon={MapIcon} label="Street" active={mapStyle === 'street' && !accessibleRoutes} onClick={() => { setMapStyle('street'); setAccessibleRoutes(false); setIsMapMenuOpen(false); announce("Changed map style to Street"); }} />
@@ -1089,7 +1089,7 @@ export default function App() {
             {isSettingsMenuOpen && (
               <div className="absolute top-full right-0 mt-2 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border-2 border-slate-300 dark:border-slate-600 py-3 w-[360px] z-[800] flex flex-col max-h-[80vh] overflow-y-auto" role="menu" aria-label="Accessibility and Data Settings">
                 
-                <div className="px-5 pb-2 mb-2 text-base font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider border-b-2 border-slate-200 dark:border-slate-700" aria-hidden="true">Vision & Text</div>
+                <div className="px-5 pb-2 mb-2 text-base font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider border-b-2 border-slate-200 dark:border-slate-700" aria-hidden="true">Vision & Text</div>
                 
                 <div className="px-5 py-3 flex flex-col space-y-3 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors rounded-lg mx-2">
                   <span className="text-base font-bold text-slate-800 dark:text-slate-200 flex items-center"><Type className="w-5 h-5 mr-3 text-indigo-800 dark:text-indigo-300"/> Readable Font</span>
@@ -1268,7 +1268,7 @@ export default function App() {
               className={`flex flex-col items-center justify-center p-3 rounded-xl transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 border-2 ${selectedStickerMode === 'custom' ? 'bg-indigo-200 dark:bg-indigo-900 border-indigo-800 text-indigo-900 dark:text-indigo-100 shadow-inner' : 'text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 border-transparent'}`}
             >
               {selectedStickerMode === 'custom' && customStickerSrc ? <img src={customStickerSrc} alt="Custom uploaded sticker" className="w-8 h-8 object-cover rounded-md drop-shadow-sm" /> : <Upload className="w-6 h-6" />}
-              <span className="text-xs font-bold mt-1">Upload</span>
+              <span className="text-base font-bold mt-1">Upload</span>
             </button>
           </div>
         </div>
@@ -1346,7 +1346,7 @@ export default function App() {
 
               {/* A11Y FIX: Group Dropdown allows easy linking to Legend */}
               <div className="mt-4">
-                <label htmlFor="item-group" className="block text-sm font-bold text-indigo-900 dark:text-indigo-200 uppercase tracking-wider mb-2">Category Link</label>
+                <label htmlFor="item-group" className="block text-base font-bold text-indigo-900 dark:text-indigo-200 uppercase tracking-wider mb-2">Category Link</label>
                 <select 
                   id="item-group"
                   value={selectedItem.groupId || ''} 
@@ -1364,15 +1364,15 @@ export default function App() {
 
             {/* A11Y FIX: Adjustable Item Scaling Tool */}
             <div className="mb-8 p-4 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl border-2 border-indigo-200 dark:border-indigo-800">
-              <label htmlFor="item-scale" className="text-sm font-bold text-indigo-900 dark:text-indigo-200 uppercase tracking-wider mb-3 flex items-center">
-                <ZoomIn className="w-4 h-4 mr-2" /> Adjust Item Size ({Math.round((selectedItem.scale || 1) * 100)}%)
+              <label htmlFor="item-scale" className="text-base font-bold text-indigo-900 dark:text-indigo-200 uppercase tracking-wider mb-3 flex items-center">
+                <ZoomIn className="w-5 h-5 mr-2" /> Adjust Item Size ({Math.round((selectedItem.scale || 1) * 100)}%)
               </label>
               <div className="flex items-center space-x-3">
                 <button 
                   onClick={() => { const ns = Math.max(0.5, (selectedItem.scale || 1) - 0.1); updateItem(selectedItem.id, { scale: ns }); announce(`Size decreased to ${Math.round(ns * 100)} percent`); }}
                   className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border-2 border-indigo-300 dark:border-indigo-600 text-indigo-800 dark:text-indigo-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 hover:bg-indigo-200 dark:hover:bg-indigo-700 transition-colors"
                   aria-label="Decrease item size"
-                ><Minus className="w-5 h-5"/></button>
+                ><Minus className="w-6 h-6"/></button>
                 <input 
                   id="item-scale"
                   type="range" min="0.5" max="5" step="0.1" 
@@ -1385,7 +1385,7 @@ export default function App() {
                   onClick={() => { const ns = Math.min(5, (selectedItem.scale || 1) + 0.1); updateItem(selectedItem.id, { scale: ns }); announce(`Size increased to ${Math.round(ns * 100)} percent`); }}
                   className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border-2 border-indigo-300 dark:border-indigo-600 text-indigo-800 dark:text-indigo-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 hover:bg-indigo-200 dark:hover:bg-indigo-700 transition-colors"
                   aria-label="Increase item size"
-                ><Plus className="w-5 h-5" /></button>
+                ><Plus className="w-6 h-6" /></button>
               </div>
             </div>
 
@@ -1506,7 +1506,7 @@ const ToolButton = ({ icon: Icon, label, active, onClick, color = "text-slate-80
       className={`relative p-4 rounded-xl flex flex-col items-center justify-center transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 border-2 ${active ? 'bg-indigo-200 dark:bg-indigo-900 text-indigo-900 dark:text-indigo-100 shadow-inner border-indigo-600' : `hover:bg-slate-200 dark:hover:bg-slate-700 border-transparent ${color}`}`} 
     >
       <Icon className={`w-8 h-8 ${active ? 'text-indigo-900 dark:text-indigo-100' : ''}`} aria-hidden="true" />
-      {shortcut && <span className="absolute bottom-0 right-0 translate-x-1/4 translate-y-1/4 text-sm font-bold bg-slate-300 dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-2 py-0.5 rounded shadow-sm border border-slate-400 dark:border-slate-600" aria-hidden="true">{shortcut}</span>}
+      {shortcut && <span className="absolute bottom-0 right-0 translate-x-1/4 translate-y-1/4 text-base font-bold bg-slate-300 dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-2 py-0.5 rounded shadow-sm border border-slate-400 dark:border-slate-600" aria-hidden="true">{shortcut}</span>}
     </button>
   );
 };
@@ -1554,11 +1554,10 @@ const CanvasNode = ({ item, isSelected, effectiveColor, groupEmoji, positionStyl
       <div className="absolute z-10" style={{ left: positionStyle.left, top: positionStyle.top, transform: `translate(-50%, -100%) scale(${finalScale})`, transformOrigin: 'bottom center' }}>
         <div {...a11yProps} className={`cursor-pointer group focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 rounded-full transition-transform ${isSelected ? 'scale-125 ring-4 ring-indigo-700' : 'hover:scale-110'}`} data-id={item.id}>
           
-          {/* A11Y FIX: Rendering Emoji over pin for colorblind distinguishability with AAA contrast stroke */}
           <div className="relative">
             <MapPin className="w-14 h-14 filter drop-shadow-xl text-slate-900 dark:text-slate-100" strokeWidth={2.5} style={{ fill: effectiveColor }} aria-hidden="true" />
             {(groupEmoji || item.emoji) && (
-              <div className="absolute top-[10px] left-1/2 -translate-x-1/2 w-6 h-6 bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-100 rounded-full flex items-center justify-center text-sm shadow-md" aria-hidden="true">
+              <div className="absolute top-[10px] left-1/2 -translate-x-1/2 w-8 h-8 bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-100 rounded-full flex items-center justify-center text-base shadow-md" aria-hidden="true">
                 {groupEmoji || item.emoji}
               </div>
             )}
@@ -1606,7 +1605,7 @@ const CanvasNode = ({ item, isSelected, effectiveColor, groupEmoji, positionStyl
           ) : (
             <div className="w-full h-32 bg-slate-200 dark:bg-slate-700 rounded-xl flex flex-col items-center justify-center mb-3 text-slate-800 dark:text-slate-200">
               <ImageIcon className="w-8 h-8 mb-2" aria-hidden="true" />
-              <span className="text-xs uppercase font-black tracking-wider">No Image</span>
+              <span className="text-base uppercase font-black tracking-wider">No Image</span>
             </div>
           )}
           <h3 className="font-black text-base text-slate-900 dark:text-slate-100 text-center truncate px-2" style={{ color: effectiveColor }}>{item.title}</h3>
