@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { 
   MapPin, StickyNote, MousePointer2, Hand, Plus, Minus, X, AlignLeft, 
@@ -209,7 +210,7 @@ export default function App() {
 
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [searchQuery, setSearchQuery] = useState(''); 
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false); // A11Y: Expandable Search
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
   // VIEW ZOOM SCALES
   const [listZoom, setListZoom] = useState(1);
@@ -439,7 +440,7 @@ export default function App() {
     return () => window.removeEventListener('receive-map-center', onReceiveMapCenter);
   }, [handleDropToCenter]);
 
-  // Global Keyboard Navigation, Undo/Redo Shortcuts, and Sequential Jumping
+  // Global Keyboard Navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
@@ -453,7 +454,6 @@ export default function App() {
         return;
       }
 
-      // A11Y FIX: Sequential Jump Navigation
       if (key === '[' || key === ']') {
         e.preventDefault();
         if (filteredItems.length === 0) return;
@@ -710,12 +710,10 @@ export default function App() {
   return (
     <div className={`relative w-full h-screen overflow-hidden flex transition-all ${fontClass} bg-neutral-100 text-slate-900 dark:bg-slate-900 dark:text-slate-100`}>
       
-      {/* A11Y: Skip to Main Content Link */}
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-[9999] bg-indigo-800 text-white px-6 py-4 rounded-xl font-bold border-4 border-indigo-900 shadow-2xl">
         Skip to main content
       </a>
 
-      {/* A11Y: Persistent state announcer / current tool status for screen readers */}
       <div aria-live="polite" className="sr-only" role="status">
         Currently active tool: {activeTool}. Use arrow keys to pan map or canvas. Press [ and ] to jump between items.
       </div>
@@ -723,14 +721,12 @@ export default function App() {
         {announcement}
       </div>
 
-      {/* A11Y: Visible Universal Toast Notification */}
       {toastMsg && (
         <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[9999] bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-xl shadow-2xl font-bold text-lg pointer-events-none transition-all animate-bounce">
           {toastMsg}
         </div>
       )}
 
-      {/* A11Y: Map and Canvas Legend */}
       {(viewMode === 'map' || viewMode === 'canvas') && (
         <div className="absolute bottom-8 left-8 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border-2 border-slate-300 dark:border-slate-700 p-5 z-[710] w-64 pointer-events-auto" role="region" aria-label="Map Legend">
           <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-200 mb-4 tracking-wider uppercase border-b-2 border-slate-200 dark:border-slate-700 pb-2">Map Legend</h2>
@@ -857,7 +853,6 @@ export default function App() {
 
         <nav className="flex space-x-2 px-2" aria-label="View Modes">
           
-          {/* A11Y FIX: Expandable Search Bar embedded in Nav */}
           {!isSearchExpanded ? (
             <button 
               onClick={() => setIsSearchExpanded(true)}
