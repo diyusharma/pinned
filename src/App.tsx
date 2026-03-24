@@ -5,7 +5,7 @@ import {
   CheckSquare, Hash, Trash2, Database, Globe, LayoutGrid, 
   List as ListIcon, ImageIcon, Pencil, Layers, Clock, Upload, Smile,
   Map as MapIcon, Satellite, Mountain, Moon, Sun, ChevronDown, Eraser,
-  ArrowDownUp, Type, Accessibility, ZoomIn, Navigation, Undo2, Redo2, Trash, Search
+  ArrowDownUp, Type, Accessibility, ZoomIn, Navigation, Undo2, Redo2, Trash, Search, Download, Edit3
 } from 'lucide-react';
 
 // --- UTILS & ID GENERATION ---
@@ -83,8 +83,6 @@ const LeafletMapEngine = ({
     if (!mapInstance) return;
     if (tileLayerRef.current) mapInstance.removeLayer(tileLayerRef.current);
     
-    // FIX: Using Esri Enterprise servers as base. 
-    // This fully prevents the OpenStreetMap 403 Vercel blocking AND fixes the mixed-language endonyms.
     let url = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}'; 
     
     if (mapStyle === 'dark') url = 'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png';
@@ -92,10 +90,7 @@ const LeafletMapEngine = ({
     if (mapStyle === 'satellite') url = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
     if (mapStyle === 'terrain') url = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'; 
 
-    // FIX: Replaced blocked volunteer OSM servers with reliable, highly-legible Esri Canvas
-    if (accessibleRoutes) {
-      url = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
-    }
+    if (accessibleRoutes) url = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
 
     tileLayerRef.current = window.L.tileLayer(url, { maxZoom: 19 }).addTo(mapInstance);
   }, [mapInstance, mapStyle, accessibleRoutes]);
@@ -104,7 +99,6 @@ const LeafletMapEngine = ({
     if (mapInstance && viewMode === 'map') setTimeout(() => mapInstance.invalidateSize(), 50);
   }, [mapInstance, viewMode]);
 
-  // Custom Event Listeners for Keyboard-driven Panning
   useEffect(() => {
     if (!mapInstance) return;
     const onReqCenter = () => {
@@ -222,7 +216,11 @@ export default function App() {
   const [listZoom, setListZoom] = useState(1);
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 });
 
-  // RESTORED TOOL & DRAWING STATE
+  // STATE
+  const [groups, setGroups] = useState(INITIAL_GROUPS);
+  const [isEditingLegend, setIsEditingLegend] = useState(false);
+  const [items, setItems] = useState(INITIAL_ITEMS);
+
   const [drawings, setDrawings] = useState([]);
   const [drawHistory, setDrawHistory] = useState([]); 
   const [drawRedo, setDrawRedo] = useState([]);       
@@ -238,6 +236,7 @@ export default function App() {
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
   const customStickerInputRef = useRef(null);
+  const csvUploadRef = useRef(null);
 
   // Canvas Mouse Dragging State
   const [isDraggingCanvas, setIsDraggingCanvas] = useState(false);
@@ -308,9 +307,6 @@ export default function App() {
   }, [appTheme]);
 
   const [viewMode, setViewMode] = useState('map'); 
-  const [items, setItems] = useState(INITIAL_ITEMS);
-  const [groups] = useState(INITIAL_GROUPS);
-  
   const [selectedId, setSelectedId] = useState(null);
   const [activeTool, setActiveTool] = useState('cursor'); 
   
@@ -346,6 +342,71 @@ export default function App() {
 
   const updateItem = (id, updates) => setItems(items.map(i => i.id === id ? { ...i, ...updates } : i));
   const deleteItem = (id) => { setItems(items.filter(i => i.id !== id)); setSelectedId(null); announce("Item deleted"); };
+
+  // --- Group Management Methods ---
+  const addGroup = () => {
+    setGroups([...groups, { id: generateId(), name: 'New Category', color: '#cbd5e1', emoji: '📌' }]);
+    announce("Added new map category");
+  };
+  const updateGroup = (id, updates) => {
+    setGroups(groups.map(g => g.id === id ? { ...g, ...updates } : g));
+  };
+  const deleteGroup = (id) => {
+    setGroups(groups.filter(g => g.id !== id));
+    // Remove group linkage from items
+    setItems(items.map(i => i.groupId === id ? { ...i, groupId: null, color: '#94a3b8' } : i));
+    announce("Category deleted");
+  };
+
+  // --- CSV Import ---
+  const handleCSVUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const csvData = event.target.result;
+      const rows = csvData.split('\n').map(row => row.split(',').map(s => s.trim()));
+      
+      // Basic parser expecting: Title, Lat, Lng, Address
+      if (rows.length > 1) {
+        const newItems = rows.slice(1).filter(r => r.length >= 3 && r[0]).map(r => ({
+          id: generateId(),
+          type: 'pin',
+          title: r[0] || 'Imported Record',
+          lat: parseFloat(r[1]),
+          lng: parseFloat(r[2]),
+          address: r[3] || '',
+          x: 400 + (Math.random() * 200 - 100), // Random jitter for canvas fallback
+          y: 300 + (Math.random() * 200 - 100),
+          scale: 1,
+          groupId: null,
+          color: '#3b82f6',
+          fields: [],
+          src: null, emoji: null
+        })).filter(i => !isNaN(i.lat) && !isNaN(i.lng));
+        
+        if (newItems.length > 0) {
+          setItems(prev => [...prev, ...newItems]);
+          announce(`Successfully imported ${newItems.length} records from CSV.`);
+        } else {
+          announce(`Failed to parse CSV. Please ensure format is Title, Latitude, Longitude.`);
+        }
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = null; // Reset input
+  };
+
+  const handleAddManualRecord = () => {
+    const newItem = {
+      id: generateId(), type: 'pin', lat: 0, lng: 0, x: window.innerWidth / 2, y: window.innerHeight / 2,
+      title: 'New Blank Record', address: '', color: '#3b82f6', scale: 1, 
+      groupId: null, fields: [], src: null, emoji: null
+    };
+    setItems(prev => [newItem, ...prev]);
+    setSelectedId(newItem.id);
+    announce("New blank record added and selected.");
+  };
 
   const handleToolChange = (tool, name) => {
     setActiveTool(tool);
@@ -734,21 +795,76 @@ export default function App() {
       )}
 
       {(viewMode === 'map' || viewMode === 'canvas') && (
-        <div className="absolute bottom-8 left-8 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border-2 border-slate-300 dark:border-slate-700 p-5 z-[710] w-64 pointer-events-auto" role="region" aria-label="Map Legend">
-          <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-200 mb-4 tracking-wider uppercase border-b-2 border-slate-200 dark:border-slate-700 pb-2">Map Legend</h2>
-          <ul className="space-y-4">
+        <div className="absolute bottom-8 left-8 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border-2 border-slate-300 dark:border-slate-700 p-5 z-[710] w-72 pointer-events-auto" role="region" aria-label="Map Legend">
+          <div className="flex justify-between items-center border-b-2 border-slate-200 dark:border-slate-700 pb-3 mb-4">
+             <h2 className="text-base font-extrabold text-slate-800 dark:text-slate-200 tracking-wider uppercase">Map Legend</h2>
+             <button 
+               onClick={() => setIsEditingLegend(!isEditingLegend)} 
+               className="p-2 bg-slate-100 dark:bg-slate-700 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-slate-700 dark:text-slate-300 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700"
+               aria-label={isEditingLegend ? "Done editing legend" : "Edit legend"}
+             >
+               {isEditingLegend ? <CheckSquare className="w-4 h-4"/> : <Edit3 className="w-4 h-4"/>}
+             </button>
+          </div>
+
+          <ul className="space-y-4 max-h-[30vh] overflow-y-auto pr-2">
             {groups.map(g => (
               <li key={g.id} className="flex items-center text-slate-900 dark:text-slate-100 font-bold text-base">
-                <div className="relative w-8 h-8 flex items-center justify-center mr-4">
-                  <MapPin className="w-8 h-8 absolute drop-shadow-md text-slate-900 dark:text-slate-100" strokeWidth={2.5} style={{ fill: g.color }} />
-                  <div className="absolute top-[2px] left-1/2 -translate-x-1/2 w-4 h-4 bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-100 rounded-full flex items-center justify-center text-[8px] shadow-sm">
-                    {g.emoji}
+                {isEditingLegend ? (
+                  <div className="flex items-center w-full space-x-2 animate-in fade-in zoom-in-95 duration-200">
+                    <input 
+                      type="text" 
+                      value={g.emoji} 
+                      onChange={(e) => updateGroup(g.id, { emoji: e.target.value })} 
+                      className="w-10 h-10 text-center rounded bg-slate-100 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700" 
+                      aria-label="Category Emoji"
+                      maxLength={2}
+                    />
+                    <input 
+                      type="color" 
+                      value={g.color} 
+                      onChange={(e) => updateGroup(g.id, { color: e.target.value })} 
+                      className="w-8 h-10 p-0 border-none bg-transparent cursor-pointer rounded" 
+                      aria-label="Category Color"
+                    />
+                    <input 
+                      type="text" 
+                      value={g.name} 
+                      onChange={(e) => updateGroup(g.id, { name: e.target.value })} 
+                      className="flex-1 bg-slate-100 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded px-2 py-2 text-sm focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700" 
+                      aria-label="Category Name"
+                    />
+                    <button 
+                      onClick={() => deleteGroup(g.id)} 
+                      className="text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 p-2 rounded focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-700"
+                      aria-label="Delete Category"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
-                </div>
-                {g.name}
+                ) : (
+                  <>
+                    <div className="relative w-8 h-8 flex items-center justify-center mr-4 shrink-0">
+                      <MapPin className="w-8 h-8 absolute drop-shadow-md text-slate-900 dark:text-slate-100" strokeWidth={2.5} style={{ fill: g.color }} />
+                      <div className="absolute top-[2px] left-1/2 -translate-x-1/2 w-4 h-4 bg-white dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-100 rounded-full flex items-center justify-center text-[8px] shadow-sm">
+                        {g.emoji}
+                      </div>
+                    </div>
+                    <span className="truncate">{g.name}</span>
+                  </>
+                )}
               </li>
             ))}
           </ul>
+          
+          {isEditingLegend && (
+             <button 
+                onClick={addGroup} 
+                className="mt-4 w-full py-2 flex items-center justify-center space-x-2 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 transition-colors"
+              >
+                <Plus className="w-4 h-4"/> <span>Add Category</span>
+              </button>
+          )}
         </div>
       )}
 
@@ -808,7 +924,27 @@ export default function App() {
         {viewMode === 'list' && (
           <div className="absolute inset-0 pt-32 px-8 pb-8 overflow-auto bg-white dark:bg-slate-900 z-0" role="region" aria-label="Database List View">
             <div className="max-w-6xl mx-auto origin-top transition-transform" style={{ transform: `scale(${listZoom})` }}>
-              <h2 className="text-3xl font-bold mb-6 flex items-center text-slate-900 dark:text-white" tabIndex={0}><Database className="mr-3" aria-hidden="true"/> Database View</h2>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+                <h2 className="text-3xl font-bold flex items-center text-slate-900 dark:text-white" tabIndex={0}><Database className="mr-3" aria-hidden="true"/> Database View</h2>
+                
+                {/* A11Y FIX: Database Management Tools (Add row, CSV Import) */}
+                <div className="flex items-center space-x-3 mt-4 sm:mt-0">
+                  <input type="file" accept=".csv" onChange={handleCSVUpload} ref={csvUploadRef} className="hidden" aria-hidden="true" />
+                  <button 
+                    onClick={() => csvUploadRef.current.click()} 
+                    className="flex items-center px-4 py-2 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-900 dark:text-indigo-100 border-2 border-indigo-300 dark:border-indigo-600 rounded-xl font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors"
+                  >
+                    <Download className="w-5 h-5 mr-2"/> Import CSV
+                  </button>
+                  <button 
+                    onClick={handleAddManualRecord} 
+                    className="flex items-center px-4 py-2 bg-indigo-700 dark:bg-indigo-600 text-white border-2 border-indigo-800 dark:border-indigo-500 rounded-xl font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 hover:bg-indigo-800 dark:hover:bg-indigo-500 transition-colors shadow-md"
+                  >
+                    <Plus className="w-5 h-5 mr-2"/> Add Record
+                  </button>
+                </div>
+              </div>
+
               <div className="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl shadow-sm overflow-x-auto" role="region" aria-label="Items Data Table">
                 <table className="w-full text-left border-collapse">
                   <thead>
@@ -829,17 +965,26 @@ export default function App() {
                     </tr>
                   </thead>
                   <tbody>
-                    {sortedItems.map(item => (
-                      <tr key={item.id} className="border-b border-slate-300 dark:border-slate-700 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 focus-within:bg-indigo-100 dark:focus-within:bg-indigo-900/40 cursor-pointer transition-colors" tabIndex={0} 
-                          onClick={() => { setViewMode('map'); setSelectedId(item.id); announce(`Located ${item.title} on map.`); }}
-                          onKeyDown={(e) => { if(e.key==='Enter') { setViewMode('map'); setSelectedId(item.id); } }}>
-                        <td className="p-4 text-base font-bold text-slate-900 dark:text-white">{item.title}</td>
-                        <td className="p-4 text-base text-slate-800 dark:text-slate-200 capitalize">{item.type}</td>
-                        <td className="p-4 text-base text-slate-800 dark:text-slate-200">{item.address || 'N/A'}</td>
-                        <td className="p-4 text-base text-slate-800 dark:text-slate-200 font-mono">{item.lat ? item.lat.toFixed(4) : 'N/A'}</td>
-                        <td className="p-4 text-base text-slate-800 dark:text-slate-200 font-mono">{item.lng ? item.lng.toFixed(4) : 'N/A'}</td>
+                    {sortedItems.length === 0 ? (
+                      <tr>
+                        <td colSpan="5" className="p-8 text-center text-slate-600 dark:text-slate-400 font-bold">No records found. Import a CSV or add a new record.</td>
                       </tr>
-                    ))}
+                    ) : (
+                      sortedItems.map(item => (
+                        <tr key={item.id} className="border-b border-slate-300 dark:border-slate-700 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 focus-within:bg-indigo-100 dark:focus-within:bg-indigo-900/40 cursor-pointer transition-colors" tabIndex={0} 
+                            onClick={() => { setViewMode('map'); setSelectedId(item.id); announce(`Located ${item.title} on map.`); }}
+                            onKeyDown={(e) => { if(e.key==='Enter') { setViewMode('map'); setSelectedId(item.id); } }}>
+                          <td className="p-4 text-base font-bold text-slate-900 dark:text-white flex items-center">
+                            {getItemGroupEmoji(item) && <span className="mr-2" aria-hidden="true">{getItemGroupEmoji(item)}</span>}
+                            {item.title}
+                          </td>
+                          <td className="p-4 text-base text-slate-800 dark:text-slate-200 capitalize">{item.type}</td>
+                          <td className="p-4 text-base text-slate-800 dark:text-slate-200">{item.address || 'N/A'}</td>
+                          <td className="p-4 text-base text-slate-800 dark:text-slate-200 font-mono">{item.lat !== undefined ? item.lat.toFixed(4) : 'N/A'}</td>
+                          <td className="p-4 text-base text-slate-800 dark:text-slate-200 font-mono">{item.lng !== undefined ? item.lng.toFixed(4) : 'N/A'}</td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -1188,6 +1333,23 @@ export default function App() {
                   )}
                 </div>
               </div>
+
+              {/* A11Y FIX: Group Dropdown allows easy linking to Legend */}
+              <div className="mt-4">
+                <label htmlFor="item-group" className="block text-sm font-bold text-indigo-900 dark:text-indigo-200 uppercase tracking-wider mb-2">Category Link</label>
+                <select 
+                  id="item-group"
+                  value={selectedItem.groupId || ''} 
+                  onChange={(e) => updateItem(selectedItem.id, { groupId: e.target.value || null, color: groups.find(g => g.id === e.target.value)?.color || selectedItem.color })}
+                  className="w-full bg-slate-100 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-4 focus:ring-indigo-700 text-slate-900 dark:text-white"
+                >
+                  <option value="">No Category (Custom Color)</option>
+                  {groups.map(g => (
+                    <option key={g.id} value={g.id}>{g.emoji} {g.name}</option>
+                  ))}
+                </select>
+              </div>
+
             </div>
 
             {/* A11Y FIX: Adjustable Item Scaling Tool */}
@@ -1382,7 +1544,6 @@ const CanvasNode = ({ item, isSelected, effectiveColor, groupEmoji, positionStyl
       <div className="absolute z-10" style={{ left: positionStyle.left, top: positionStyle.top, transform: `translate(-50%, -100%) scale(${finalScale})`, transformOrigin: 'bottom center' }}>
         <div {...a11yProps} className={`cursor-pointer group focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 rounded-full transition-transform ${isSelected ? 'scale-125 ring-4 ring-indigo-700' : 'hover:scale-110'}`} data-id={item.id}>
           
-          {/* A11Y FIX: Rendering Emoji over pin for colorblind distinguishability with AAA contrast stroke */}
           <div className="relative">
             <MapPin className="w-14 h-14 filter drop-shadow-xl text-slate-900 dark:text-slate-100" strokeWidth={2.5} style={{ fill: effectiveColor }} aria-hidden="true" />
             {(groupEmoji || item.emoji) && (
