@@ -857,7 +857,7 @@ export default function App() {
           </h1>
         </div>
 
-        <nav className="flex space-x-2 px-2" aria-label="View Modes">
+        <nav className="flex items-center space-x-2 px-2 shrink-0" aria-label="View Modes">
           
           {!isSearchExpanded ? (
             <button 
@@ -866,7 +866,7 @@ export default function App() {
               className={`p-2 px-4 rounded-xl flex items-center space-x-2 transition-all text-base font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 border-2 bg-transparent text-slate-800 hover:bg-slate-200 border-transparent hover:border-slate-400 dark:text-slate-200 dark:hover:bg-slate-700`}
             >
               <Search className="w-5 h-5" aria-hidden="true" />
-              <span className="hidden sm:inline">Search</span>
+              <span className="hidden sm:inline whitespace-nowrap">Search</span>
             </button>
           ) : (
             <div className="flex items-center bg-slate-100 dark:bg-slate-900 rounded-xl px-4 py-2 border-2 border-indigo-400 dark:border-indigo-600 focus-within:ring-4 focus-within:ring-indigo-700 transition-all w-48 sm:w-64 mr-2">
@@ -893,7 +893,7 @@ export default function App() {
               className={`p-2 px-4 rounded-xl flex items-center space-x-2 transition-all text-base font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 border-2 ${viewMode === 'map' ? 'bg-indigo-200 text-indigo-900 border-indigo-400 dark:bg-indigo-900/50 dark:text-indigo-100 dark:border-indigo-600' : 'bg-transparent text-slate-800 hover:bg-slate-200 border-transparent hover:border-slate-400 dark:text-slate-200 dark:hover:bg-slate-700'}`}
             >
               <Globe className="w-5 h-5" aria-hidden="true" />
-              <span>Map View</span>
+              <span className="whitespace-nowrap">Map View</span>
               {viewMode === 'map' && <ChevronDown className={`w-4 h-4 ml-1 transition-transform ${isMapMenuOpen ? 'rotate-180' : ''}`} aria-hidden="true" />}
               <span className="ml-2 text-base font-bold bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200 px-2 py-1 rounded" aria-hidden="true">M</span>
             </button>
@@ -927,7 +927,7 @@ export default function App() {
               className={`p-2 px-4 rounded-xl flex items-center space-x-2 transition-all text-base font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 border-2 ${isSettingsMenuOpen ? 'bg-indigo-200 text-indigo-900 border-indigo-400 dark:bg-indigo-900/50 dark:text-indigo-100 dark:border-indigo-600' : 'bg-transparent text-slate-800 hover:bg-slate-200 border-transparent hover:border-slate-400 dark:text-slate-200 dark:hover:bg-slate-700'}`}
             >
               <Accessibility className="w-5 h-5" aria-hidden="true" />
-              <span className="hidden sm:inline">Settings</span>
+              <span className="hidden sm:inline whitespace-nowrap">Settings</span>
               <span className="hidden lg:inline ml-2 text-base font-bold bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200 px-2 py-1 rounded" aria-hidden="true">A</span>
             </button>
 
@@ -1300,7 +1300,7 @@ const ViewButton = ({ icon: Icon, label, active, onClick, shortcut }) => {
       className={`p-2 px-4 rounded-xl flex items-center space-x-2 transition-all text-base font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-700 border-2 ${active ? 'bg-indigo-200 text-indigo-900 border-indigo-400 dark:bg-indigo-900/50 dark:text-indigo-100 dark:border-indigo-600' : 'bg-transparent text-slate-800 hover:bg-slate-200 border-transparent hover:border-slate-400 dark:text-slate-200 dark:hover:bg-slate-700'}`}
     >
       <Icon className="w-5 h-5" aria-hidden="true" />
-      <span className="hidden md:inline">{label}</span>
+      <span className="hidden md:inline whitespace-nowrap">{label}</span>
       {shortcut && <span className="ml-2 text-base font-bold bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200 px-2 py-1 rounded" aria-hidden="true">{shortcut}</span>}
     </button>
   );
